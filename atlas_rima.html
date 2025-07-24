@@ -49,35 +49,60 @@
                   </div>
 
                   <!-- Filtro por municipio -->
-                  <h5 class="my-3 text-warning">Municipio:</h5>
-                  <div class="position-relative">
-                      <select id="municipioSelector" class="form-select form-select-sm" onchange="centerOnMunicipio('municipioSelector')" disabled>
-                          <option value="">Cargando municipios...</option>
-                      </select>
-                      <div id="loadingSpinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
-                          <div class="spinner-border spinner-border-sm text-primary" role="status">
-                              <span class="visually-hidden">Loading...</span>
-                          </div>
-                      </div>
-                  </div>
+				  
+    <!-- Filtro por Municipio -->
+    <h5 class="my-3 text-warning">Municipio:</h5>
+    <div class="position-relative mb-3">
+        <select id="municipioSelector" class="form-select form-select-sm" onchange="centerOnMunicipio('municipioSelector')" disabled>
+            <option value="">Cargando municipios...</option>
+        </select>
+        <div id="loadingSpinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
+	
+                <!-- Nivel y Turno en la misma línea (responsive) -->
+    <div class="d-flex flex-column flex-md-row gap-3 mt-3 mb-3">
 
-                  <h5 class="my-2 text-warning">Nivel:</h5>
-                  <ul class="nav flex-column">
-                      <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('all')"><h5>Todos</h5></li>
-                      <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('PRIMARIA')"><h5>Primaria</h5></li>
-                      <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('SECUNDARIA')"><h5>Secundaria</h5></li>
-                  </ul>
+        <!-- Filtro por Nivel -->
+        <div class="flex-fill">
+            <h5 class="my-0 text-warning">Nivel:</h5>
+            <ul class="nav flex-column mt-2 mb-0">
+                <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('all')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Todos</h6>
+                </li>
+                <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('PRIMARIA')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Primaria</h6>
+                </li>
+                <li class="nav-item menu-item" data-tipo="nivel" onclick="filterLevel('SECUNDARIA')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Secundaria</h6>
+                </li>
+            </ul>
+        </div>
 
-                  <h5 class="my-2 text-warning">Turno:</h5>
-                  <ul class="nav flex-column">
-                      <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('all')"><h5>Todos</h5></li>
-                      <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('Matutino')"><h5>Matutino</h5></li>
-                      <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('Vespertino')"><h5>Vespertino</h5></li>
-                  </ul>
+        <!-- Filtro por Turno -->
+        <div class="flex-fill">
+            <h5 class="my-0 text-warning">Turno:</h5>
+            <ul class="nav flex-column mt-2 mb-0">
+                <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('all')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Todos</h6>
+                </li>
+                <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('Matutino')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Matutino</h6>
+                </li>
+                <li class="nav-item menu-item" data-tipo="turno" onclick="filterShift('Vespertino')">
+                    <h6 class="nav-link mb-1 small" style="font-weight: bold; color: white;">Vespertino</h6>
+                </li>
+            </ul>
+        </div>
 
+    </div>
+ <!-- Botón de reiniciar filtros -->
                   <button class="btn btn-warning mt-2 w-100" onclick="resetFilters()">Reiniciar filtros</button>
 
-              </div>
+              </div> <!-- END de filtros , filterContainer -->
           </div>
 
 
