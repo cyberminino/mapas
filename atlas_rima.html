@@ -101,9 +101,44 @@
     </div>
  <!-- Botón de reiniciar filtros -->
                   <button class="btn btn-warning mt-2 w-100" onclick="resetFilters()">Reiniciar filtros</button>
+<!-- Filtro por región y top escuelas -->
+<div class="mt-3">
+  <h5 class="text-warning">Selecciona una Región:</h5>
+  <select id="regionSelect" class="form-select form-select-sm mb-2" onchange="handleRegionSelection()">
+    <option value="">-- Selecciona región --</option>
+    <option value="1">Región 1</option>
+    <option value="2">Región 2</option>
+    <option value="3">Región 3</option>
+    <option value="4">Región 4</option>
+    <option value="5">Región 5</option>
+    <option value="6">Región 6</option>
+    <option value="7">Región 7</option>
+  </select>
+
+  <h5 class="text-warning mt-2">Top escuelas prioritarias:</h5>
+  <select id="schoolSelect" class="form-select form-select-sm" onchange="handleSchoolSelection()" disabled>
+    <option value="">Selecciona una escuela</option>
+  </select>
+</div>
+
+
+<!-- Busqueda por nombre Agregar al código de Nancy-->
+<div class="mt-3">
+ <h5 class="text-warning mt-2">Busqueda por municipio-nombre:</h5>
+ <input type="text" id="nombreEscuelaInput" class="form-control form-control-sm mb-2"
+         placeholder="Escribe parte del nombre..." oninput="buscarEscuelasPorNombre()" list="sugerenciasEscuelas" onchange="seleccionarEscuelaPorNombre()" />
+		 
+  <datalist id="sugerenciasEscuelas">
+  <!-- END dinámicamente -->
+</datalist>
+</div>
+
+<!-- Fin de Busqueda por nombre -->
+
 
               </div> <!-- END de filtros , filterContainer -->
           </div>
+
 
 
           <!-- Inicio Offcanvas para móviles -->

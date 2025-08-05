@@ -628,8 +628,182 @@ map.on('moveend', () => {
     updateMap(); // Llama a la función que filtra y luego ejecuta addMarkers()
 });
 
+// Funciones para mostrar las 10 escuelas con mayor prioridad por región.---------------------------------------------------
 
-//
+function handleRegionSelection() {
+
+  const regionId = document.getElementById('regionSelect').value;
+  const schoolSelect = document.getElementById('schoolSelect');
+  schoolSelect.innerHTML = '';
+  schoolSelect.disabled = true;
+
+  if (!regionId) return;
+
+  // Separar por nivel
+const primarias = escuelas
+  .filter(e => e.region == regionId && e.nivel === 'PRIMARIA' && e.Orden_Porcent_DR != null)
+  .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
+  .slice(0, 10);
+
+const secundarias = escuelas
+  .filter(e => e.region == regionId && e.nivel === 'SECUNDARIA' && e.Orden_Porcent_DR != null)
+  .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
+  .slice(0, 10);
+
+const filtered = [...primarias, ...secundarias];
+
+  if (filtered.length === 0) {
+    const option = document.createElement('option');
+    option.text = 'No hay escuelas disponibles';
+    schoolSelect.appendChild(option);
+    return;
+  }
+
+// opción po defecto
+  const defaultOption = document.createElement('option');
+  defaultOption.text = 'Selecciona una escuela';
+  defaultOption.value = '';
+  schoolSelect.appendChild(defaultOption);
+  
+// Creación de la lista en el select
+  filtered.forEach(e => {
+    const option = document.createElement('option');
+    option.value = e.clavect;
+    option.text = `${e.nivel} - ${e.nombre} (${e.clavect}) - #${e.Orden_Porcent_DR}`;
+    schoolSelect.appendChild(option);
+  });
+
+  schoolSelect.disabled = false;
+
+  // Centrar en la región (opcional)
+  const feature = municipiosSource.getFeatures().find(f => f.get('Region') == regionId);
+  if (feature) {
+    const geometry = feature.getGeometry();
+    const center = geometry.getType() === 'Polygon'
+      ? geometry.getInteriorPoint().getCoordinates()
+      : ol.extent.getCenter(geometry.getExtent());
+    map.getView().animate({ center, zoom: 10, duration: 600 });
+  }
+}
+
+
+//Función para la selección de la escuela por nivel de logro
+function handleSchoolSelection() {
+  const selectedCCT = document.getElementById('schoolSelect').value;
+  if (!selectedCCT) return;
+  searchSchoolByClaveCTManual(selectedCCT);
+}
+
+// Función auxiliar para reutilizar lógica de búsqueda (sin input box)
+function searchSchoolByClaveCTManual(claveCT) {
+  const searchErrorMessage = document.getElementById('searchErrorMessage');
+  if (searchErrorMessage) searchErrorMessage.textContent = '';
+
+  const school = escuelas.find(escuela => escuela.clavect === claveCT);
+  if (!school) {
+    if (searchErrorMessage) searchErrorMessage.textContent = 'Escuela no encontrada';
+    return;
+  }
+
+  const coordinates = ol.proj.fromLonLat(school.latlng);
+
+  map.getView().animate({
+    center: coordinates,
+    zoom: 16,
+    duration: 500
+  });
+
+  setTimeout(() => {
+    content.innerHTML = `
+      <div id="popup-content-table">
+        <table class="table table-bordered table-striped table-sm popup-table">
+          <tbody>
+            <tr><th>Clave CT</th><td>${school.clavect}</td></tr>
+            <tr><th>Nombre</th><td>${school.nombre}</td></tr>
+            <tr><th>Turno</th><td>${school.turno}</td></tr>
+            <tr><th>Total de estudiantes</th><td>${school.alumnos}*</td></tr>
+            <tr><th>Estudiantes en situación de abandono</th><td>${school.Abandonantes}*</td></tr>
+
+            <tr class="table-primary text-center"><th colspan="2">Alumnos por nivel de los resultados de logro</th></tr>
+            <tr><td>Español Nivel I</td><td>${school.Esp_Nivel_I} (${school.Esp_PercentI}%)</td></tr>
+            <tr><td>Español Nivel II</td><td>${school.Esp_Nivel_II} (${school.Esp_PercentII}%)</td></tr>
+            <tr><td>Matemáticas Nivel I</td><td>${school.Mat_Nivel_I} (${school.Mat_PercentI}%)</td></tr>
+            <tr><td>Matemáticas Nivel II</td><td>${school.Mat_Nivel_II} (${school.Mat_PercentII}%)</td></tr>
+
+            <tr class="table-primary text-center"><th colspan="2">Comprensión Lectora</th></tr>
+            <tr><td>Domina</td><td>${school.Esp_Dom1} (${school.Percent_EspDom1}%)</td></tr>
+            <tr><td>En proceso</td><td>${school.Esp_Dom2} (${school.Percent_EspDom2}%)</td></tr>
+            <tr><td>Sin comprensión</td><td>${school.Esp_Dom3} (${school.Percent_EspDom3}%)</td></tr>
+
+            <tr class="table-primary text-center"><th colspan="2">Operaciones Matemáticas</th></tr>
+            <tr><td>Domina</td><td>${school.Mat_Dom1} (${school.Percent_MatDom1}%)</td></tr>
+            <tr><td>En proceso</td><td>${school.Mat_Dom2} (${school.Percent_MatDom2}%)</td></tr>
+            <tr><td>No domina</td><td>${school.Mat_Dom3} (${school.Percent_MatDom3}%)</td></tr>
+            <tr class="footer-note"><td colspan="2"><em>Datos RIMA 2024</em></td></tr>
+            <tr class="footer-note"><td colspan="2"><em>* Datos control escolar 2025</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-center mt-2">
+        <button class="btn btn-sm btn-outline-danger" onclick="descargarPDF('${school.clavect}')">
+          <i class="bi bi-file-earmark-pdf"></i> Imprimir CCT
+        </button>
+      </div>`;
+    overlay.setPosition(coordinates);
+  }, 600);
+}
+
+// cambiar en la base de datos el id para el municipio-----------------------------------------------------
+// Funciones para la busqueda de cct por nombre agregar al codigo de Nancy
+function buscarEscuelasPorNombre() {
+  const municipio = document.getElementById('municipioSelector').value.toLowerCase();
+  const textoBusqueda = document.getElementById('nombreEscuelaInput').value.trim().toLowerCase();
+  const lista = document.getElementById('sugerenciasEscuelas');
+
+  lista.innerHTML = '';
+
+  if (!municipio) {
+    alert('Por favor, selecciona un municipio antes de buscar una escuela por nombre.');
+    return;
+  }
+
+  if (!textoBusqueda || !escuelas || escuelas.length === 0) return;
+
+  const textoNormalizado = textoBusqueda.normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+  const municipioNormalizado = municipio.normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+
+  const resultados = escuelas.filter(e => {
+    const nombreNormalizado = e.nombre?.toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+    const municipioEscuelaNormalizado = e.Municipio?.toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+
+    return nombreNormalizado?.includes(textoNormalizado) && municipioEscuelaNormalizado === municipioNormalizado;
+  });
+
+  resultados.forEach(escuela => {
+    const option = document.createElement('option');
+    option.value = `${escuela.nombre} (${escuela.clavect})`;
+    lista.appendChild(option);
+  });
+}
+
+//------------------------------
+function seleccionarEscuelaPorNombre() {
+  const input = document.getElementById('nombreEscuelaInput');
+  const valorSeleccionado = input.value;
+
+  // Extraer CCT entre paréntesis
+  const match = valorSeleccionado.match(/\(([^)]+)\)$/);
+  if (!match) {
+    //alert('Por favor, selecciona una opción válida de la lista desplegable.');
+    return;
+  }
+
+  const claveCT = match[1];
+  searchSchoolByClaveCTManual(claveCT);
+}
+// cambiar en los archivos de nancy-----------------------------------------------------
+
+
 // Llamar la primera vez
 window.onload = function () {
     loadSchoolsFromJSON();
