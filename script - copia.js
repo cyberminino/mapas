@@ -632,29 +632,28 @@ map.on('moveend', () => {
 
 
 // Funciones para mostrar las 10 escuelas con mayor prioridad por región.---------------------------------------------------
-function handleRegionSelection(regionSelectId, schoolSelectId) {
-	alert("¡Bienvenido al sistema RIMA!");
-	
-	console.log("Ejecutando handleRegionSelection con:", regionSelectId, schoolSelectId);
-  const regionId = document.getElementById(regionSelectId).value;
-  const schoolSelect = document.getElementById(schoolSelectId);
 
+function handleRegionSelection() {
+
+  const regionId = document.getElementById('regionSelect').value;
+  const schoolSelect = document.getElementById('schoolSelect');
   schoolSelect.innerHTML = '';
   schoolSelect.disabled = true;
 
   if (!regionId) return;
 
-  const primarias = escuelas
-    .filter(e => e.region == regionId && e.nivel === 'PRIMARIA' && e.Orden_Porcent_DR != null)
-    .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
-    .slice(0, 10);
+  // Separar por nivel
+const primarias = escuelas
+  .filter(e => e.region == regionId && e.nivel === 'PRIMARIA' && e.Orden_Porcent_DR != null)
+  .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
+  .slice(0, 10);
 
-  const secundarias = escuelas
-    .filter(e => e.region == regionId && e.nivel === 'SECUNDARIA' && e.Orden_Porcent_DR != null)
-    .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
-    .slice(0, 10);
+const secundarias = escuelas
+  .filter(e => e.region == regionId && e.nivel === 'SECUNDARIA' && e.Orden_Porcent_DR != null)
+  .sort((a, b) => a.Orden_Porcent_DR - b.Orden_Porcent_DR)
+  .slice(0, 10);
 
-  const filtered = [...primarias, ...secundarias];
+const filtered = [...primarias, ...secundarias];
 
   if (filtered.length === 0) {
     const option = document.createElement('option');
@@ -663,11 +662,13 @@ function handleRegionSelection(regionSelectId, schoolSelectId) {
     return;
   }
 
+// opción po defecto
   const defaultOption = document.createElement('option');
   defaultOption.text = 'Selecciona una escuela';
   defaultOption.value = '';
   schoolSelect.appendChild(defaultOption);
-
+  
+// Creación de la lista en el select
   filtered.forEach(e => {
     const option = document.createElement('option');
     option.value = e.clavect;
@@ -677,7 +678,7 @@ function handleRegionSelection(regionSelectId, schoolSelectId) {
 
   schoolSelect.disabled = false;
 
-  // Centrar en la región
+  // Centrar en la región (opcional)
   const feature = municipiosSource.getFeatures().find(f => f.get('Region') == regionId);
   if (feature) {
     const geometry = feature.getGeometry();
@@ -688,15 +689,16 @@ function handleRegionSelection(regionSelectId, schoolSelectId) {
   }
 }
 
+// END handleRegionSelection ---->
 
-// para el siguiente DIV
-function handleSchoolSelection(schoolSelectId) {
-  const selectedCCT = document.getElementById(schoolSelectId).value;
+
+
+//Función para la selección de la escuela por nivel de logro
+function handleSchoolSelection() {
+  const selectedCCT = document.getElementById('schoolSelect').value;
   if (!selectedCCT) return;
   searchSchoolByClaveCTManual(selectedCCT);
 }
-
-
 
 // Función auxiliar para reutilizar lógica de búsqueda (sin input box)
 function searchSchoolByClaveCTManual(claveCT) {
